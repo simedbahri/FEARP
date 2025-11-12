@@ -1,34 +1,54 @@
-
-import React, { createContext, useState, ReactNode, useContext } from 'react';
+import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react';
+import { auth } from '../firebase/config';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
 
 interface AuthContextType {
+  currentUser: User | null;
   isLoggedIn: boolean;
-  login: (password: string) => boolean;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ADMIN_PASSWORD = 'admin password';
-
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  if (!auth) {
+    // This should not be reached if the configuration check in App.tsx is working.
+    // It's a safeguard and helps with type inference.
+    throw new Error("Firebase Auth is not initialized. Please check your Firebase configuration.");
+  }
+  
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (password: string) => {
-    if (password === ADMIN_PASSWORD) {
-      setIsLoggedIn(true);
-      return true;
-    }
-    return false;
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
   const logout = () => {
-    setIsLoggedIn(false);
+    signOut(auth);
+  };
+
+  const value = {
+    currentUser,
+    isLoggedIn: !!currentUser,
+    loading,
+    login,
+    logout,
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
-      {children}
+    <AuthContext.Provider value={value}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

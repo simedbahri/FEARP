@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { Article } from '../types';
+import { db } from '../firebase/config';
+import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 
 interface ArticleContextType {
   articles: Article[];
@@ -7,132 +9,80 @@ interface ArticleContextType {
   updateArticle: (id: string, article: Omit<Article, 'id' | 'date'>) => Promise<void>;
   deleteArticle: (id: string) => Promise<void>;
   getArticleById: (id: string) => Article | undefined;
+  loading: boolean;
 }
 
 const ArticleContext = createContext<ArticleContextType | undefined>(undefined);
 
-// --- IndexedDB Configuration ---
-const DB_NAME = 'FearpDB';
-const DB_VERSION = 1;
-const STORE_NAME = 'articles';
-
-// Keep a single DB connection promise to avoid re-opening the database unnecessarily.
-let dbPromise: Promise<IDBDatabase>;
-
-const openDB = (): Promise<IDBDatabase> => {
-  if (!dbPromise) {
-    dbPromise = new Promise((resolve, reject) => {
-      if (!window.indexedDB) {
-        return reject('IndexedDB is not supported by this browser.');
-      }
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-      request.onupgradeneeded = () => {
-        const db = request.result;
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-        }
-      };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-  return dbPromise;
-};
-
 export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  if (!db) {
+    // This should not be reached if the configuration check in App.tsx is working.
+    // It's a safeguard and helps with type inference.
+    throw new Error("Firestore is not initialized. Please check your Firebase configuration.");
+  }
+
   const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const articlesCollectionRef = collection(db, "articles");
 
-  const refreshArticles = async () => {
+  const fetchArticles = async () => {
+    setLoading(true);
     try {
-      const db = await openDB();
-      const transaction = db.transaction(STORE_NAME, 'readonly');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.getAll();
-
-      request.onsuccess = () => {
-        // Sort by date descending and update state
-        const sortedArticles = request.result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setArticles(sortedArticles || []);
-      };
-      request.onerror = () => {
-        console.error('Error fetching articles:', request.error);
-        setArticles([]);
-      };
+      const q = query(articlesCollectionRef, orderBy("date", "desc"));
+      const data = await getDocs(q);
+      const fetchedArticles = data.docs.map((doc) => {
+        const docData = doc.data();
+        return {
+          ...docData,
+          id: doc.id,
+          date: docData.date?.toDate().toISOString(),
+        } as Article
+      });
+      setArticles(fetchedArticles);
     } catch (error) {
-      console.error('Could not refresh articles from DB', error);
-      setArticles([]);
+      console.error("Error fetching articles from Firestore:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    // On initial load, fetch all articles from the database.
-    // The blog will start empty if no articles have been added.
-    refreshArticles();
+    fetchArticles();
   }, []);
-
-  /**
-   * A robust, reusable helper to perform IndexedDB transactions.
-   * It wraps the transaction in a promise that only resolves on `oncomplete`.
-   * This guarantees the operation is fully finished before proceeding.
-   */
-  const performTransaction = async (
-    mode: IDBTransactionMode,
-    action: (store: IDBObjectStore) => void
-  ): Promise<void> => {
+  
+  const addArticle = async (articleData: Omit<Article, 'id' | 'date'>): Promise<void> => {
     try {
-      const db = await openDB();
-      await new Promise<void>((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, mode);
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-        transaction.onabort = () => reject(transaction.error);
-        
-        const store = transaction.objectStore(STORE_NAME);
-        action(store);
+      await addDoc(articlesCollectionRef, {
+        ...articleData,
+        date: serverTimestamp(),
       });
+      await fetchArticles(); // Refresh after adding
     } catch (error) {
-      console.error('IndexedDB transaction failed:', error);
+      console.error("Error adding article to Firestore:", error);
       throw error;
     }
   };
 
-
-  const addArticle = async (articleData: Omit<Article, 'id' | 'date'>): Promise<void> => {
-    const newArticle: Article = {
-      ...articleData,
-      id: new Date().getTime().toString(),
-      date: new Date().toISOString(),
-    };
-    
-    await performTransaction('readwrite', (store) => {
-      store.put(newArticle);
-    });
-
-    // After DB write, refresh the state from the DB to ensure UI is in sync.
-    await refreshArticles();
-  };
-
   const updateArticle = async (id: string, updatedArticleData: Omit<Article, 'id' | 'date'>): Promise<void> => {
-    const articleToUpdate = articles.find(a => a.id === id);
-    if (!articleToUpdate) throw new Error('Article not found for update.');
-    
-    const updatedArticle: Article = { ...articleToUpdate, ...updatedArticleData };
-    
-    await performTransaction('readwrite', (store) => {
-      store.put(updatedArticle);
-    });
-
-    // After DB write, refresh the state from the DB.
-    await refreshArticles();
+    try {
+      const articleDoc = doc(db, "articles", id);
+      await updateDoc(articleDoc, updatedArticleData);
+      await fetchArticles(); // Refresh after updating
+    } catch (error) {
+      console.error("Error updating article in Firestore:", error);
+      throw error;
+    }
   };
   
   const deleteArticle = async (id: string): Promise<void> => {
-    await performTransaction('readwrite', (store) => {
-      store.delete(id);
-    });
-    
-    // After DB write, refresh the state from the DB.
-    await refreshArticles();
+    try {
+      const articleDoc = doc(db, "articles", id);
+      await deleteDoc(articleDoc);
+      await fetchArticles(); // Refresh after deleting
+    } catch(error) {
+      console.error("Error deleting article from Firestore:", error);
+      throw error;
+    }
   };
     
   const getArticleById = (id: string) => {
@@ -140,7 +90,7 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   return (
-    <ArticleContext.Provider value={{ articles, addArticle, updateArticle, deleteArticle, getArticleById }}>
+    <ArticleContext.Provider value={{ articles, addArticle, updateArticle, deleteArticle, getArticleById, loading }}>
       {children}
     </ArticleContext.Provider>
   );

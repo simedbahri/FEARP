@@ -1,27 +1,39 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 const AdminLogin: React.FC = () => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!login(password)) {
-      setError('Incorrect password. Please try again.');
-      setPassword('');
-    } else {
-      setError('');
+    setError('');
+    try {
+      await login(email, password);
+    } catch (err) {
+      setError('Failed to log in. Please check your email and password.');
+      console.error(err);
     }
   };
 
   return (
     <div className="max-w-md mx-auto mt-10 bg-white p-8 rounded-xl shadow-lg">
       <h2 className="text-3xl font-bold font-serif text-center text-brand-text mb-6">Admin Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="email" className="block text-gray-700 font-bold mb-2">Email</label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-pink"
+            required
+          />
+        </div>
+        <div>
           <label htmlFor="password" className="block text-gray-700 font-bold mb-2">Password</label>
           <input
             type="password"
