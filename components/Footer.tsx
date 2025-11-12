@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
           <Link to="/cookie-policy" className="text-gray-600 hover:text-brand-dark-pink transition-colors">Cookie Policy</Link>
           <Link to="/newsletter" className="text-gray-600 hover:text-brand-dark-pink transition-colors">Newsletter</Link>
           <Link to="/collaborate" className="text-gray-600 hover:text-brand-dark-pink transition-colors">Work With Us</Link>
-          <a href="/admin212" className="text-gray-600 hover:text-brand-dark-pink transition-colors">Admin</a>
+          <a href="admin212" className="text-gray-600 hover:text-brand-dark-pink transition-colors">Admin</a>
         </div>
         <p>&copy; {new Date().getFullYear()} Fearp. All Rights Reserved.</p>
         <p className="text-sm mt-1">Your daily dose of inspiration.</p>
