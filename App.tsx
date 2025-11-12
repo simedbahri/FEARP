@@ -20,6 +20,7 @@ import NewsletterPage from './pages/NewsletterPage';
 import CollaborationsPage from './pages/CollaborationsPage';
 import CookieConsent from './components/CookieConsent';
 import AdPlaceholder from './components/AdPlaceholder';
+import AdminPage from './pages/AdminPage';
 
 const App: React.FC = () => {
   return (
@@ -44,6 +45,7 @@ const App: React.FC = () => {
                 <Route path="/cookie-policy" element={<CookiePolicyPage />} />
                 <Route path="/newsletter" element={<NewsletterPage />} />
                 <Route path="/collaborate" element={<CollaborationsPage />} />
+                <Route path="/admin212" element={<AdminPage />} />
               </Routes>
             </main>
             <div className="container mx-auto px-4">
