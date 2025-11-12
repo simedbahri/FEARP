@@ -4,7 +4,7 @@ import { useArticles } from '../contexts/ArticleContext';
 import { Article } from '../types';
 
 const ArticleForm: React.FC<{
-  onSubmit: (data: Omit<Article, 'id'|'date'|'imageUrl'>) => void;
+  onSubmit: (data: Omit<Article, 'id'|'date'|'imageUrl'>) => Promise<void>;
   articleToEdit: Article | null;
   clearEdit: () => void;
 }> = ({ onSubmit, articleToEdit, clearEdit }) => {
@@ -35,14 +35,27 @@ const ArticleForm: React.FC<{
     checkContentEmpty();
   }, [articleToEdit]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const content = contentRef.current?.innerHTML || '';
     if (!title.trim() || !content.trim()) {
       alert('Title and Content cannot be empty.');
       return;
     }
-    onSubmit({ title, content });
+    try {
+      await onSubmit({ title, content });
+      // If we are adding a NEW article, clear the form on success
+      if (!articleToEdit) {
+        setTitle('');
+        if (contentRef.current) {
+          contentRef.current.innerHTML = '';
+        }
+        checkContentEmpty();
+      }
+    } catch (error) {
+      // The error is handled and alerted by the parent component.
+      // No further action needed here.
+    }
   };
   
   const handleInsertPageBreak = () => {
@@ -101,12 +114,18 @@ const AdminDashboard: React.FC = () => {
   const formRef = useRef<HTMLDivElement>(null);
 
   const handleFormSubmit = async (data: Omit<Article, 'id'|'date'|'imageUrl'>) => {
-    if (articleToEdit) {
-      await updateArticle(articleToEdit.id, data);
-    } else {
-      await addArticle(data);
+    try {
+      if (articleToEdit) {
+        await updateArticle(articleToEdit.id, data);
+      } else {
+        await addArticle(data);
+      }
+      setArticleToEdit(null); // Clear edit mode on success
+    } catch (error) {
+      console.error('Failed to submit article:', error);
+      alert('Error: Could not save the article. Please check the console for more details and try again.');
+      throw error; // Re-throw to inform the form component that the submission failed.
     }
-    setArticleToEdit(null); // Clear form after submit
   };
 
   const handleEditClick = (article: Article) => {

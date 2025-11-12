@@ -12,8 +12,12 @@ const AdminLogin: React.FC = () => {
     setError('');
     try {
       await login(email, password);
-    } catch (err) {
-      setError('Failed to log in. Please check your email and password.');
+    } catch (err: any) {
+      if (err.code === 'auth/invalid-credential') {
+        setError('Invalid email or password. Please check your credentials. Note: An admin user must be created in the Firebase Authentication console first.');
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
       console.error(err);
     }
   };
@@ -31,6 +35,7 @@ const AdminLogin: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-pink"
             required
+            autoComplete="email"
           />
         </div>
         <div>
@@ -42,6 +47,7 @@ const AdminLogin: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-dark-pink"
             required
+            autoComplete="current-password"
           />
         </div>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}

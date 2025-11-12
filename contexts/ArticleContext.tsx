@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { Article } from '../types';
 import { db } from '../firebase/config';
-import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, onSnapshot } from 'firebase/firestore';
 
 interface ArticleContextType {
   articles: Article[];
@@ -19,38 +19,41 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [loading, setLoading] = useState<boolean>(true);
   const articlesCollectionRef = collection(db, "articles");
 
-  const fetchArticles = async () => {
+  useEffect(() => {
     setLoading(true);
-    try {
-      const q = query(articlesCollectionRef, orderBy("date", "desc"));
-      const data = await getDocs(q);
-      const fetchedArticles = data.docs.map((doc) => {
+    const q = query(articlesCollectionRef, orderBy("date", "desc"));
+    
+    // Set up the real-time listener. This is more efficient and reliable than manual fetching.
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const fetchedArticles = querySnapshot.docs.map((doc) => {
         const docData = doc.data();
+        // onSnapshot ensures we get the resolved server timestamp, making this check robust.
+        // A fallback is still good practice for any edge cases.
+        const date = docData.date ? docData.date.toDate().toISOString() : new Date().toISOString();
         return {
           ...docData,
           id: doc.id,
-          date: docData.date?.toDate().toISOString(),
-        } as Article
+          date: date,
+        } as Article;
       });
       setArticles(fetchedArticles);
-    } catch (error) {
-      console.error("Error fetching articles from Firestore:", error);
-    } finally {
       setLoading(false);
-    }
-  };
+    }, (error) => {
+      console.error("Error listening to articles collection:", error);
+      setLoading(false);
+    });
 
-  useEffect(() => {
-    fetchArticles();
-  }, []);
+    // Cleanup listener on component unmount
+    return () => unsubscribe();
+  }, []); // Empty dependency array ensures this effect runs only once.
   
   const addArticle = async (articleData: Omit<Article, 'id' | 'date'>): Promise<void> => {
     try {
+      // Add the document. The onSnapshot listener will automatically handle the UI update.
       await addDoc(articlesCollectionRef, {
         ...articleData,
         date: serverTimestamp(),
       });
-      await fetchArticles(); // Refresh after adding
     } catch (error) {
       console.error("Error adding article to Firestore:", error);
       throw error;
@@ -60,8 +63,8 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
   const updateArticle = async (id: string, updatedArticleData: Omit<Article, 'id' | 'date'>): Promise<void> => {
     try {
       const articleDoc = doc(db, "articles", id);
+      // Update the document. The onSnapshot listener will automatically handle the UI update.
       await updateDoc(articleDoc, updatedArticleData);
-      await fetchArticles(); // Refresh after updating
     } catch (error) {
       console.error("Error updating article in Firestore:", error);
       throw error;
@@ -71,8 +74,8 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
   const deleteArticle = async (id: string): Promise<void> => {
     try {
       const articleDoc = doc(db, "articles", id);
+      // Delete the document. The onSnapshot listener will automatically handle the UI update.
       await deleteDoc(articleDoc);
-      await fetchArticles(); // Refresh after deleting
     } catch(error) {
       console.error("Error deleting article from Firestore:", error);
       throw error;
