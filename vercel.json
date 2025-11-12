@@ -1,12 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/wp-admin{/}?",
-      "destination": "/wp-admin/index.html"
-    },
-    {
-      "source": "/((?!api/|_next/|\\..*|wp-admin/).*)",
-      "destination": "/index.html"
+      "source": "/admin212{/}?",
+      "destination": "/admin212/index.html"
     }
   ]
 }
