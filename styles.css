@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    background-color: #FFF7FB; /* A very light pink background */
+    font-family: 'Poppins', sans-serif;
+    color: #4B5563;
+}
+
+[contenteditable][placeholder]:empty:before {
+    content: attr(placeholder);
+    color: #9CA3AF; /* text-gray-400 */
+    pointer-events: none;
+    display: block; /* for certain browsers */
+}
+
+/* --- ENHANCED PROSE STYLES --- */
+/* This section provides more sophisticated typography and spacing for article content. */
+
+/* Base prose settings */
+.prose {
+    --tw-prose-body: #4B5563; /* brand-text */
+    --tw-prose-headings: #1F2937; /* gray-800 */
+    --tw-prose-links: #F9A8D4; /* brand-dark-pink */
+    --tw-prose-bold: #4B5563;
+    --tw-prose-quotes: #4B5563;
+    --tw-prose-quote-borders: #FCE7F3; /* brand-pink */
+    line-height: 1.75; /* Increased line height for readability */
+}
+
+/* Paragraphs and lists have increased spacing */
+.prose p,
+.prose ul,
+.prose ol,
+.prose blockquote {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+}
+
+/* Headings styling for elegance and hierarchy */
+.prose h2,
+.prose h3,
+.prose h4 {
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    margin-top: 2em;
+    margin-bottom: 1em;
+    line-height: 1.3;
+}
+
+.prose h2 {
+    font-size: 1.875rem; /* text-3xl */
+    padding-bottom: 0.3em;
+    border-bottom: 2px solid #FCE7F3; /* brand-pink */
+}
+
+.prose h3 {
+    font-size: 1.5rem; /* text-2xl */
+}
+
+/* Link styling */
+.prose a {
+    text-decoration: underline;
+    text-decoration-color: #FCE7F3; /* brand-pink */
+    text-decoration-thickness: 2px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.prose a:hover {
+    text-decoration-color: #F9A8D4; /* brand-dark-pink */
+    background-color: #FCE7F3; /* brand-pink */
+    border-radius: 4px;
+}
+
+/* Blockquote enhancement */
+.prose blockquote {
+    font-style: italic;
+    padding-left: 1rem;
+    border-left-width: 4px; /* Slightly thicker border */
+    color: #6B7280; /* gray-500 */
+}
+
+.prose blockquote p:first-of-type::before {
+    content: none; /* remove default quotes */
+}
+.prose blockquote p:last-of-type::after {
+    content: none;
+}
+
+/* List styling */
+.prose ul > li::marker {
+    color: #F9A8D4; /* brand-dark-pink */
+}
+
+/* Image styling */
+.prose img {
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
