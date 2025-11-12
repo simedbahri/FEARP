@@ -4,8 +4,6 @@ import AdminPage from '../pages/AdminPage';
 import { AuthProvider } from '../contexts/AuthContext';
 import { ArticleProvider } from '../contexts/ArticleContext';
 import '../styles.css';
-import { isFirebaseConfigured } from '../firebase/config';
-import { ConfigurationError } from '../components/ConfigurationError';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -15,16 +13,12 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    {isFirebaseConfigured ? (
-      <AuthProvider>
-        <ArticleProvider>
-          <div className="p-4 sm:p-8">
-            <AdminPage />
-          </div>
-        </ArticleProvider>
-      </AuthProvider>
-    ) : (
-      <ConfigurationError />
-    )}
+    <AuthProvider>
+      <ArticleProvider>
+        <div className="p-4 sm:p-8">
+          <AdminPage />
+        </div>
+      </ArticleProvider>
+    </AuthProvider>
   </React.StrictMode>
 );

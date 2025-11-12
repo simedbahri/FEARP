@@ -20,14 +20,8 @@ import NewsletterPage from './pages/NewsletterPage';
 import CollaborationsPage from './pages/CollaborationsPage';
 import CookieConsent from './components/CookieConsent';
 import AdPlaceholder from './components/AdPlaceholder';
-import { isFirebaseConfigured } from './firebase/config';
-import { ConfigurationError } from './components/ConfigurationError';
 
 const App: React.FC = () => {
-  if (!isFirebaseConfigured) {
-    return <ConfigurationError />;
-  }
-
   return (
     <AuthProvider>
       <ArticleProvider>

@@ -13,12 +13,6 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  if (!auth) {
-    // This should not be reached if the configuration check in App.tsx is working.
-    // It's a safeguard and helps with type inference.
-    throw new Error("Firebase Auth is not initialized. Please check your Firebase configuration.");
-  }
-  
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 

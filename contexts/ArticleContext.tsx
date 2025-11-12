@@ -15,12 +15,6 @@ interface ArticleContextType {
 const ArticleContext = createContext<ArticleContextType | undefined>(undefined);
 
 export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  if (!db) {
-    // This should not be reached if the configuration check in App.tsx is working.
-    // It's a safeguard and helps with type inference.
-    throw new Error("Firestore is not initialized. Please check your Firebase configuration.");
-  }
-
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const articlesCollectionRef = collection(db, "articles");

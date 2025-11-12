@@ -13,7 +13,10 @@ export const ConfigurationError: React.FC = () => (
             <div className="mt-6 text-left bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <h2 className="font-semibold text-gray-700">Action Required:</h2>
                 <p className="mt-2 text-sm text-gray-600">
-                    If you are the developer, please ensure you have set up your Firebase project and added the necessary environment variables to your deployment settings (e.g., in Vercel). These variables should be prefixed with <code className="bg-gray-200 text-red-600 font-mono p-1 rounded">REACT_APP_</code>.
+                    If you are the developer, please update your environment variables in your Vercel project settings. For Vercel to expose variables to the browser, they must be prefixed with <code className="bg-gray-200 text-red-600 font-mono p-1 rounded">NEXT_PUBLIC_</code>.
+                </p>
+                 <p className="mt-2 text-sm text-gray-600">
+                    For example, rename <code className="bg-gray-200 font-mono p-1 rounded">REACT_APP_FIREBASE_API_KEY</code> to <code className="bg-gray-200 font-mono p-1 rounded">NEXT_PUBLIC_FIREBASE_API_KEY</code>.
                 </p>
             </div>
         </div>
