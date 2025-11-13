@@ -84,8 +84,8 @@ const ArticlePage: React.FC = () => {
   if (!article || !currentPageContent) {
     return (
       <div className="text-center py-20">
-        <h2 className="text-3xl font-bold">Article not found</h2>
-        <Link to="/" className="text-brand-dark-pink hover:underline mt-4 inline-block">Back to Home</Link>
+        <h2 className="text-3xl font-bold dark:text-gray-100">Article not found</h2>
+        <Link to="/" className="text-brand-dark-pink dark:text-pink-400 hover:underline mt-4 inline-block">Back to Home</Link>
       </div>
     );
   }
@@ -105,10 +105,10 @@ const ArticlePage: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
       <div className="lg:col-span-2">
-        <article className="bg-white p-6 sm:p-8 lg:p-12 rounded-xl shadow-lg">
-          <h1 className="text-4xl md:text-5xl font-bold font-serif text-brand-text mb-4">{article.title}</h1>
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 border-y border-gray-100 py-3 gap-4">
-            <p className="text-gray-500 text-sm">
+        <article className="bg-white dark:bg-gray-800 p-6 sm:p-8 lg:p-12 rounded-xl shadow-lg">
+          <h1 className="text-4xl md:text-5xl font-bold font-serif text-brand-text dark:text-gray-100 mb-4">{article.title}</h1>
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 border-y border-gray-100 dark:border-gray-700 py-3 gap-4">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
               Published on {new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
             <SocialShareButtons article={article} />
@@ -116,7 +116,7 @@ const ArticlePage: React.FC = () => {
 
           <AdPlaceholder type="in-article-top" />
 
-          <div className="prose prose-lg max-w-none text-brand-text font-serif">
+          <div className="prose prose-lg max-w-none text-brand-text dark:text-gray-300 font-serif">
             <div dangerouslySetInnerHTML={{ __html: processedContent[0].trim() }} />
             {processedContent.length > 1 && (
               <>
@@ -133,21 +133,21 @@ const ArticlePage: React.FC = () => {
       <aside className="lg:col-span-1">
         <div className="sticky top-24 space-y-8">
           <div>
-            <h3 className="font-bold font-serif text-gray-700 text-2xl border-b pb-3 mb-6">Sponsored</h3>
+            <h3 className="font-bold font-serif text-gray-700 dark:text-gray-200 text-2xl border-b dark:border-gray-700 pb-3 mb-6">Sponsored</h3>
             <AdPlaceholder type="sidebar" />
           </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-between items-center px-4 py-3 bg-white rounded-lg shadow-md">
+            <div className="flex justify-between items-center px-4 py-3 bg-white dark:bg-gray-800 rounded-lg shadow-md">
               {currentPage > 1 ? (
-                <Link to={`/article/${id}/${currentPage - 1}`} className="text-brand-dark-pink font-bold hover:underline">
+                <Link to={`/article/${id}/${currentPage - 1}`} className="text-brand-dark-pink dark:text-pink-400 font-bold hover:underline">
                   &larr; Prev
                 </Link>
               ) : <div />}
-              <span className="text-gray-600 text-sm">Page {currentPage}/{totalPages}</span>
+              <span className="text-gray-600 dark:text-gray-400 text-sm">Page {currentPage}/{totalPages}</span>
               {currentPage < totalPages ? (
-                <Link to={`/article/${id}/${currentPage + 1}`} className="text-brand-dark-pink font-bold hover:underline">
+                <Link to={`/article/${id}/${currentPage + 1}`} className="text-brand-dark-pink dark:text-pink-400 font-bold hover:underline">
                   Next &rarr;
                 </Link>
               ) : <div />}
@@ -158,15 +158,15 @@ const ArticlePage: React.FC = () => {
           {currentPage === totalPages && (prevArticle || nextArticle) && (
               <div className="space-y-4">
                 {prevArticle && (
-                  <Link to={`/article/${prevArticle.id}/1`} className="block p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow text-left">
-                    <p className="text-sm text-gray-500">&larr; Previous Article</p>
-                    <h4 className="font-bold text-brand-text mt-1 line-clamp-2">{prevArticle.title}</h4>
+                  <Link to={`/article/${prevArticle.id}/1`} className="block p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow text-left">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">&larr; Previous Article</p>
+                    <h4 className="font-bold text-brand-text dark:text-gray-200 mt-1 line-clamp-2">{prevArticle.title}</h4>
                   </Link>
                 )}
                 {nextArticle && (
-                  <Link to={`/article/${nextArticle.id}/1`} className="block p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow text-right">
-                    <p className="text-sm text-gray-500">Next Article &rarr;</p>
-                    <h4 className="font-bold text-brand-text mt-1 line-clamp-2">{nextArticle.title}</h4>
+                  <Link to={`/article/${nextArticle.id}/1`} className="block p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow text-right">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Next Article &rarr;</p>
+                    <h4 className="font-bold text-brand-text dark:text-gray-200 mt-1 line-clamp-2">{nextArticle.title}</h4>
                   </Link>
                 )}
               </div>
@@ -174,15 +174,15 @@ const ArticlePage: React.FC = () => {
 
           {/* Related Posts Section */}
           {relatedPosts.length > 0 && (
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h3 className="font-bold font-serif text-gray-700 text-2xl border-b pb-3 mb-6">Related Posts</h3>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+              <h3 className="font-bold font-serif text-gray-700 dark:text-gray-200 text-2xl border-b dark:border-gray-700 pb-3 mb-6">Related Posts</h3>
               <div className="space-y-4">
                 {relatedPosts.map(post => {
                   const relatedPostImage = getFirstImage(post.content) || `https://picsum.photos/seed/${post.id}/200/200`;
                   return (
                     <Link key={post.id} to={`/article/${post.id}/1`} className="flex items-center gap-4 group">
                       <img src={relatedPostImage} alt={post.title} className="w-20 h-20 object-cover rounded-md flex-shrink-0" loading="lazy" />
-                      <h4 className="font-semibold font-serif text-brand-text group-hover:text-brand-dark-pink transition-colors">{post.title}</h4>
+                      <h4 className="font-semibold font-serif text-brand-text dark:text-gray-200 group-hover:text-brand-dark-pink dark:group-hover:text-pink-400 transition-colors">{post.title}</h4>
                     </Link>
                   )
                 })}

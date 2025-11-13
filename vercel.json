@@ -1,3 +1,9 @@
-{
 
+{
+  "rewrites": [
+    {
+      "source": "/((?!api/|admin212/|wp-admin/|_next/|static/|public/|favicon.ico|robots.txt|sitemap.xml|ads.txt).*)",
+      "destination": "/index.html"
+    }
+  ]
 }

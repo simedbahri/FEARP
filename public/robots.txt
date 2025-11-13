@@ -2,4 +2,4 @@
 User-agent: *
 Disallow: /admin212/
 
-Sitemap: /sitemap.xml
+Sitemap: https://fearp.com/sitemap.xml

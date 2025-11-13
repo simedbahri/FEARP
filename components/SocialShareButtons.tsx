@@ -14,8 +14,8 @@ const getFirstImage = (htmlContent: string, articleId: string): string => {
 };
 
 const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({ article, className }) => {
-  // Construct the canonical URL for sharing
-  const articleUrl = `${window.location.origin}${window.location.pathname.split('#')[0]}#/article/${article.id}/1`;
+  // Construct the canonical URL for sharing using the new clean URL structure
+  const articleUrl = `${window.location.origin}/article/${article.id}/1`;
   
   const encodedUrl = encodeURIComponent(articleUrl);
   const encodedTitle = encodeURIComponent(article.title);

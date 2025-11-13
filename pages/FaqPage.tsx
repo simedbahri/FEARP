@@ -26,13 +26,13 @@ const FaqPage: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white max-w-4xl mx-auto p-8 rounded-xl shadow-lg">
-      <h1 className="text-4xl font-bold font-serif text-brand-text mb-6 text-center">Frequently Asked Questions</h1>
+    <div className="bg-white dark:bg-gray-800 max-w-4xl mx-auto p-8 rounded-xl shadow-lg">
+      <h1 className="text-4xl font-bold font-serif text-brand-text dark:text-gray-100 mb-6 text-center">Frequently Asked Questions</h1>
       <div className="space-y-6">
         {faqs.map((faq, index) => (
-          <div key={index} className="border-b pb-4">
-            <h2 className="text-2xl font-semibold font-serif text-brand-dark-pink">{faq.question}</h2>
-            <p className="mt-2 text-brand-text font-serif">{faq.answer}</p>
+          <div key={index} className="border-b dark:border-gray-700 pb-4">
+            <h2 className="text-2xl font-semibold font-serif text-brand-dark-pink dark:text-pink-400">{faq.question}</h2>
+            <p className="mt-2 text-brand-text dark:text-gray-300 font-serif">{faq.answer}</p>
           </div>
         ))}
       </div>

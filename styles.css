@@ -2,10 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-    background-color: #FFF7FB; /* A very light pink background */
-    font-family: 'Poppins', sans-serif;
-    color: #4B5563;
+@layer base {
+    body {
+        @apply bg-[#FFF7FB] text-brand-text font-sans;
+    }
+    .dark body {
+        @apply bg-gray-900 text-gray-300;
+    }
 }
 
 [contenteditable][placeholder]:empty:before {
@@ -27,6 +30,15 @@ body {
     --tw-prose-quotes: #4B5563;
     --tw-prose-quote-borders: #FCE7F3; /* brand-pink */
     line-height: 1.75; /* Increased line height for readability */
+}
+
+.dark .prose {
+    --tw-prose-body: #d1d5db; /* gray-300 */
+    --tw-prose-headings: #f9fafb; /* gray-50 */
+    --tw-prose-links: #F9A8D4; /* brand-dark-pink */
+    --tw-prose-bold: #d1d5db;
+    --tw-prose-quotes: #9ca3af; /* gray-400 */
+    --tw-prose-quote-borders: #4b5563; /* gray-600 */
 }
 
 /* Paragraphs and lists have increased spacing */
@@ -54,6 +66,9 @@ body {
     padding-bottom: 0.3em;
     border-bottom: 2px solid #FCE7F3; /* brand-pink */
 }
+.dark .prose h2 {
+    border-bottom-color: #4b5563; /* gray-600 */
+}
 
 .prose h3 {
     font-size: 1.5rem; /* text-2xl */
@@ -72,6 +87,10 @@ body {
     text-decoration-color: #F9A8D4; /* brand-dark-pink */
     background-color: #FCE7F3; /* brand-pink */
     border-radius: 4px;
+}
+
+.dark .prose a:hover {
+    background-color: #4b5563; /* gray-600 */
 }
 
 /* Blockquote enhancement */

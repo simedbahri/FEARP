@@ -8,9 +8,9 @@ const CookiePolicyPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-white max-w-4xl mx-auto p-8 rounded-xl shadow-lg">
-      <h1 className="text-4xl font-bold font-serif text-brand-text mb-6 text-center">Cookie Policy</h1>
-      <div className="prose prose-lg max-w-none text-brand-text font-serif">
+    <div className="bg-white dark:bg-gray-800 max-w-4xl mx-auto p-8 rounded-xl shadow-lg">
+      <h1 className="text-4xl font-bold font-serif text-brand-text dark:text-gray-100 mb-6 text-center">Cookie Policy</h1>
+      <div className="prose prose-lg max-w-none text-brand-text dark:text-gray-300 font-serif">
         <p><em>Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</em></p>
         <p>
           This Cookie Policy explains what cookies are and how we use them on Fearp ("Site"). You should read this policy to understand what cookies are, how we use them, the types of cookies we use, the information we collect using cookies, how that information is used, and how to control your cookie preferences. For further information on how we use, store, and keep your personal data secure, see our <Link to="/privacy-policy">Privacy Policy</Link>.

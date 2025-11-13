@@ -19,7 +19,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
   const featuredImage = getFirstImage(article.content) || `https://picsum.photos/seed/${article.id}/800/600`;
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 ease-in-out group flex flex-col">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-black/20 overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 ease-in-out group flex flex-col">
       <Link to={`/article/${article.id}/1`} className="block">
         <img 
           className="w-full h-56 object-cover group-hover:opacity-90 transition-opacity duration-300" 
@@ -30,11 +30,11 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
       </Link>
       <div className="p-6 flex flex-col flex-grow">
         <Link to={`/article/${article.id}/1`}>
-          <h2 className="text-2xl font-bold font-serif text-brand-text mb-2 group-hover:text-brand-dark-pink transition-colors duration-300">{article.title}</h2>
+          <h2 className="text-2xl font-bold font-serif text-brand-text dark:text-gray-100 mb-2 group-hover:text-brand-dark-pink dark:group-hover:text-pink-400 transition-colors duration-300">{article.title}</h2>
         </Link>
-        <p className="text-gray-600 my-4 flex-grow">{excerpt}</p>
-        <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
-          <Link to={`/article/${article.id}/1`} className="text-brand-dark-pink font-semibold hover:underline text-sm">Read More &rarr;</Link>
+        <p className="text-gray-600 dark:text-gray-400 my-4 flex-grow">{excerpt}</p>
+        <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+          <Link to={`/article/${article.id}/1`} className="text-brand-dark-pink dark:text-pink-400 font-semibold hover:underline text-sm">Read More &rarr;</Link>
           <SocialShareButtons article={article} />
         </div>
       </div>

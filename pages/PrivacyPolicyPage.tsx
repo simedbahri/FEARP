@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const PrivacyPolicyPage: React.FC = () => {
   React.useEffect(() => {
@@ -7,9 +8,9 @@ const PrivacyPolicyPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-white max-w-4xl mx-auto p-8 rounded-xl shadow-lg">
-      <h1 className="text-4xl font-bold font-serif text-brand-text mb-6 text-center">Privacy Policy</h1>
-      <div className="prose prose-lg max-w-none text-brand-text font-serif">
+    <div className="bg-white dark:bg-gray-800 max-w-4xl mx-auto p-8 rounded-xl shadow-lg">
+      <h1 className="text-4xl font-bold font-serif text-brand-text dark:text-gray-100 mb-6 text-center">Privacy Policy</h1>
+      <div className="prose prose-lg max-w-none text-brand-text dark:text-gray-300 font-serif">
         <p><em>Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</em></p>
         
         <p>
@@ -51,7 +52,7 @@ const PrivacyPolicyPage: React.FC = () => {
 
         <h2>Contact Us</h2>
         <p>
-          If you have any questions about this Privacy Policy, please contact us via our <a href="#/contact">Contact Page</a>.
+          If you have any questions about this Privacy Policy, please contact us via our <Link to="/contact">Contact Page</Link>.
         </p>
       </div>
     </div>

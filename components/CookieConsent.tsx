@@ -35,11 +35,11 @@ const CookieConsent: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm p-4 border-t border-pink-200 z-50 shadow-2xl animate-slide-up">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-4 border-t border-pink-200 dark:border-gray-700 z-50 shadow-2xl animate-slide-up">
       <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-sm text-brand-text text-center sm:text-left">
+        <p className="text-sm text-brand-text dark:text-gray-300 text-center sm:text-left">
           We use cookies to enhance your experience and for advertising purposes. By continuing to visit this site you agree to our use of cookies. Read our{' '}
-          <Link to="/cookie-policy" className="font-bold text-brand-dark-pink hover:underline">
+          <Link to="/cookie-policy" className="font-bold text-brand-dark-pink dark:text-pink-400 hover:underline">
             Cookie Policy
           </Link>.
         </p>

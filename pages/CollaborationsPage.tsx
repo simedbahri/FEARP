@@ -8,9 +8,9 @@ const CollaborationsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-white max-w-4xl mx-auto p-8 rounded-xl shadow-lg">
-      <h1 className="text-4xl font-bold font-serif text-brand-text mb-6 text-center">Work With Us</h1>
-      <div className="prose prose-lg max-w-none text-brand-text font-serif">
+    <div className="bg-white dark:bg-gray-800 max-w-4xl mx-auto p-8 rounded-xl shadow-lg">
+      <h1 className="text-4xl font-bold font-serif text-brand-text dark:text-gray-100 mb-6 text-center">Work With Us</h1>
+      <div className="prose prose-lg max-w-none text-brand-text dark:text-gray-300 font-serif">
         <p>
           Thank you for your interest in collaborating with Fearp! We are always excited to partner with brands, creators, and artists who align with our mission of inspiring creativity and confidence.
         </p>
