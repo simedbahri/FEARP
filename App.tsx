@@ -21,6 +21,7 @@ import CollaborationsPage from './pages/CollaborationsPage';
 import CookieConsent from './components/CookieConsent';
 import AdPlaceholder from './components/AdPlaceholder';
 import AdminPage from './pages/AdminPage';
+import ScrollToTopButton from './components/ScrollToTopButton';
 
 const App: React.FC = () => {
   return (
@@ -53,6 +54,7 @@ const App: React.FC = () => {
             </div>
             <Footer />
             <CookieConsent />
+            <ScrollToTopButton />
           </div>
         </HashRouter>
       </ArticleProvider>

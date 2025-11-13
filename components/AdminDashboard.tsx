@@ -109,7 +109,7 @@ const ArticleForm: React.FC<{
 
 const AdminDashboard: React.FC = () => {
   const { logout } = useAuth();
-  const { articles, addArticle, updateArticle, deleteArticle } = useArticles();
+  const { articles, addArticle, updateArticle, deleteArticle, loading } = useArticles();
   const [articleToEdit, setArticleToEdit] = useState<Article | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -148,6 +148,27 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const renderArticleList = () => {
+    if (loading) {
+      return <p className="text-center text-gray-500">Loading articles...</p>;
+    }
+    if (articles.length === 0) {
+      return <p className="text-center text-gray-500">No articles found.</p>;
+    }
+    return articles.map(article => (
+      <div key={article.id} className="flex justify-between items-center p-4 border rounded-md transition-shadow hover:shadow-md">
+          <div>
+              <p className="font-bold text-lg">{article.title}</p>
+              <p className="text-sm text-gray-500">Published: {new Date(article.date).toLocaleDateString()}</p>
+          </div>
+          <div className="flex space-x-2">
+              <button onClick={() => handleEditClick(article)} className="px-3 py-1 bg-brand-gold text-white rounded-md text-sm hover:bg-amber-500 transition-colors duration-300">Edit</button>
+              <button onClick={() => handleDeleteClick(article.id)} className="px-3 py-1 bg-gray-600 text-white rounded-md text-sm hover:bg-gray-700 transition-colors duration-300">Delete</button>
+          </div>
+      </div>
+    ));
+  };
+
   return (
     <div className="space-y-8">
         <div className="flex justify-between items-center">
@@ -162,18 +183,7 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-2xl font-bold font-serif text-brand-text mb-4">Manage Articles</h3>
             <div className="space-y-4">
-                {articles.map(article => (
-                    <div key={article.id} className="flex justify-between items-center p-4 border rounded-md transition-shadow hover:shadow-md">
-                        <div>
-                            <p className="font-bold text-lg">{article.title}</p>
-                            <p className="text-sm text-gray-500">Published: {new Date(article.date).toLocaleDateString()}</p>
-                        </div>
-                        <div className="flex space-x-2">
-                            <button onClick={() => handleEditClick(article)} className="px-3 py-1 bg-brand-gold text-white rounded-md text-sm hover:bg-amber-500 transition-colors duration-300">Edit</button>
-                            <button onClick={() => handleDeleteClick(article.id)} className="px-3 py-1 bg-gray-600 text-white rounded-md text-sm hover:bg-gray-700 transition-colors duration-300">Delete</button>
-                        </div>
-                    </div>
-                ))}
+                {renderArticleList()}
             </div>
         </div>
     </div>

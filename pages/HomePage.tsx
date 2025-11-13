@@ -5,7 +5,7 @@ import ArticleCard from '../components/ArticleCard';
 import AdPlaceholder from '../components/AdPlaceholder';
 
 const HomePage: React.FC = () => {
-  const { articles } = useArticles();
+  const { articles, loading } = useArticles();
 
   const articlesWithAds = articles.reduce((acc, article, index) => {
     acc.push(<ArticleCard key={article.id} article={article} />);
@@ -15,6 +15,29 @@ const HomePage: React.FC = () => {
     }
     return acc;
   }, [] as React.ReactNode[]);
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="text-center bg-white p-10 rounded-xl shadow-md">
+          <p className="text-xl text-gray-500">Loading articles...</p>
+        </div>
+      );
+    }
+    if (articles.length > 0) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {articlesWithAds}
+        </div>
+      );
+    }
+    return (
+      <div className="text-center bg-white p-10 rounded-xl shadow-md">
+        <p className="text-xl text-gray-500">No articles have been published yet.</p>
+        <p className="text-gray-400 mt-2">Check back soon for amazing content!</p>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-12">
@@ -30,16 +53,7 @@ const HomePage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <section className="lg:col-span-2">
           <h2 className="text-3xl font-bold font-serif mb-8 text-brand-text">Latest Articles</h2>
-          {articles.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {articlesWithAds}
-            </div>
-          ) : (
-            <div className="text-center bg-white p-10 rounded-xl shadow-md">
-              <p className="text-xl text-gray-500">No articles have been published yet.</p>
-              <p className="text-gray-400 mt-2">Check back soon for amazing content!</p>
-            </div>
-          )}
+          {renderContent()}
         </section>
 
         <aside className="lg:col-span-1">

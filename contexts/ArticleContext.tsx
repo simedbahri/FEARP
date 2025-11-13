@@ -1,7 +1,8 @@
+
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { Article } from '../types';
 import { db } from '../firebase/config';
-import { collection, addDoc, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, deleteDoc, query, serverTimestamp, onSnapshot } from 'firebase/firestore';
 
 interface ArticleContextType {
   articles: Article[];
@@ -21,14 +22,13 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   useEffect(() => {
     setLoading(true);
-    const q = query(articlesCollectionRef, orderBy("date", "desc"));
+    // REMOVED: orderBy("date", "desc"). This avoids the need for a manual Firestore index,
+    // which can cause misleading "permission-denied" errors if not configured correctly.
+    const q = query(articlesCollectionRef);
     
-    // Set up the real-time listener. This is more efficient and reliable than manual fetching.
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const fetchedArticles = querySnapshot.docs.map((doc) => {
         const docData = doc.data();
-        // onSnapshot ensures we get the resolved server timestamp, making this check robust.
-        // A fallback is still good practice for any edge cases.
         const date = docData.date ? docData.date.toDate().toISOString() : new Date().toISOString();
         return {
           ...docData,
@@ -36,20 +36,30 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
           date: date,
         } as Article;
       });
+      
+      // Perform sorting on the client-side to ensure newest articles are first.
+      fetchedArticles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
       setArticles(fetchedArticles);
       setLoading(false);
     }, (error) => {
-      console.error("Error listening to articles collection:", error);
+      console.error("Firebase Error:", error);
+      // Provide a more helpful error message for the developer.
+      if (error.code === 'permission-denied') {
+          console.error(
+            'Firestore Security Rules are denying access. ' +
+            'Please check your rules in the Firebase Console. ' +
+            'Ensure that the `articles` collection is readable by the public.'
+          );
+      }
       setLoading(false);
     });
 
-    // Cleanup listener on component unmount
     return () => unsubscribe();
-  }, []); // Empty dependency array ensures this effect runs only once.
+  }, []);
   
   const addArticle = async (articleData: Omit<Article, 'id' | 'date'>): Promise<void> => {
     try {
-      // Add the document. The onSnapshot listener will automatically handle the UI update.
       await addDoc(articlesCollectionRef, {
         ...articleData,
         date: serverTimestamp(),
@@ -63,7 +73,6 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
   const updateArticle = async (id: string, updatedArticleData: Omit<Article, 'id' | 'date'>): Promise<void> => {
     try {
       const articleDoc = doc(db, "articles", id);
-      // Update the document. The onSnapshot listener will automatically handle the UI update.
       await updateDoc(articleDoc, updatedArticleData);
     } catch (error) {
       console.error("Error updating article in Firestore:", error);
@@ -74,7 +83,6 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
   const deleteArticle = async (id: string): Promise<void> => {
     try {
       const articleDoc = doc(db, "articles", id);
-      // Delete the document. The onSnapshot listener will automatically handle the UI update.
       await deleteDoc(articleDoc);
     } catch(error) {
       console.error("Error deleting article from Firestore:", error);
