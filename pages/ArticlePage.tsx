@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useArticles } from '../contexts/ArticleContext';
 import SocialShareButtons from '../components/SocialShareButtons';
 import AdPlaceholder from '../components/AdPlaceholder';
+import SEOHead from '../components/SEOHead';
 
 // --- Ad Injection Logic ---
 const injectInArticleAd = (htmlContent: string): string => {
@@ -52,27 +53,20 @@ const ArticlePage: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
-    const defaultTitle = 'Fearp - Your Daily Source of Inspiration';
-    const defaultDescription = "Discover your daily dose of inspiration with Fearp. Explore the latest trends, easy-to-follow tutorials, and creative lifestyle tips. Your go-to blog for creativity.";
-
-    const metaDescriptionTag = document.querySelector('meta[name="description"]');
-
-    if (article) {
-      document.title = `${article.title} | Fearp`;
-      const excerpt = article.content.replace(/<[^>]+>/g, '').substring(0, 157).trim() + '...';
-      if (metaDescriptionTag) {
-        metaDescriptionTag.setAttribute('content', excerpt);
-      }
-    }
-
-    return () => {
-      document.title = defaultTitle;
-      if (metaDescriptionTag) {
-        metaDescriptionTag.setAttribute('content', defaultDescription);
-      }
-    };
   }, [id, currentPage, article]);
+
+  // Get article image for SEO
+  const getArticleImage = (htmlContent: string): string | null => {
+    const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
+    const img = doc.querySelector('img');
+    return img ? img.src : null;
+  };
+
+  const articleExcerpt = article 
+    ? article.content.replace(/<[^>]+>/g, '').substring(0, 157).trim() + '...'
+    : '';
+  
+  const articleImage = article ? getArticleImage(article.content) : null;
 
   useEffect(() => {
     if (article && (isNaN(currentPage) || currentPage < 1 || currentPage > totalPages)) {
@@ -94,7 +88,8 @@ const ArticlePage: React.FC = () => {
   const prevArticle = currentIndex > 0 ? articles[currentIndex - 1] : null;
   const nextArticle = currentIndex < articles.length - 1 ? articles[currentIndex + 1] : null;
 
-  const relatedPosts = articles.filter(p => p.id !== article.id).slice(0, 3);
+  // Show more related posts for arbitrage (more page views)
+  const relatedPosts = articles.filter(p => p.id !== article.id).slice(0, 6);
     
   const getFirstImage = (htmlContent: string): string | null => {
     const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
@@ -103,9 +98,23 @@ const ArticlePage: React.FC = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-      <div className="lg:col-span-2">
-        <article className="bg-white dark:bg-gray-800 p-6 sm:p-8 lg:p-12 rounded-xl shadow-lg">
+    <>
+      {article && (
+        <SEOHead
+          title={article.title}
+          description={articleExcerpt}
+          canonical={`https://fearp.com/article/${article.id}/${currentPage}`}
+          article={{
+            title: article.title,
+            description: articleExcerpt,
+            publishedTime: article.date,
+            image: articleImage || undefined,
+          }}
+        />
+      )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+        <div className="lg:col-span-2">
+          <article className="bg-white dark:bg-gray-800 p-6 sm:p-8 lg:p-12 rounded-xl shadow-lg">
           <h1 className="text-4xl md:text-5xl font-bold font-serif text-brand-text dark:text-gray-100 mb-4">{article.title}</h1>
           <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 border-y border-gray-100 dark:border-gray-700 py-3 gap-4">
             <p className="text-gray-500 dark:text-gray-400 text-sm">
@@ -172,26 +181,42 @@ const ArticlePage: React.FC = () => {
               </div>
           )}
 
-          {/* Related Posts Section */}
+          {/* Related Posts Section - Optimized for arbitrage */}
           {relatedPosts.length > 0 && (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
               <h3 className="font-bold font-serif text-gray-700 dark:text-gray-200 text-2xl border-b dark:border-gray-700 pb-3 mb-6">Related Posts</h3>
-              <div className="space-y-4">
-                {relatedPosts.map(post => {
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                {relatedPosts.slice(0, 4).map(post => {
                   const relatedPostImage = getFirstImage(post.content) || `https://picsum.photos/seed/${post.id}/200/200`;
                   return (
-                    <Link key={post.id} to={`/article/${post.id}/1`} className="flex items-center gap-4 group">
+                    <Link key={post.id} to={`/article/${post.id}/1`} className="flex items-center gap-4 group p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                       <img src={relatedPostImage} alt={post.title} className="w-20 h-20 object-cover rounded-md flex-shrink-0" loading="lazy" />
-                      <h4 className="font-semibold font-serif text-brand-text dark:text-gray-200 group-hover:text-brand-dark-pink dark:group-hover:text-pink-400 transition-colors">{post.title}</h4>
+                      <h4 className="font-semibold font-serif text-brand-text dark:text-gray-200 group-hover:text-brand-dark-pink dark:group-hover:text-pink-400 transition-colors text-sm">{post.title}</h4>
                     </Link>
                   )
                 })}
               </div>
+              {/* Additional related posts in list format */}
+              {relatedPosts.length > 4 && (
+                <div className="space-y-3 border-t dark:border-gray-700 pt-4">
+                  {relatedPosts.slice(4).map(post => (
+                    <Link key={post.id} to={`/article/${post.id}/1`} className="block text-brand-text dark:text-gray-200 hover:text-brand-dark-pink dark:hover:text-pink-400 transition-colors font-serif">
+                      → {post.title}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           )}
+          
+          {/* Additional ad slot in sidebar */}
+          <div className="mt-8">
+            <AdPlaceholder type="sidebar" />
+          </div>
         </div>
       </aside>
     </div>
+    </>
   );
 };
 

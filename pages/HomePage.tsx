@@ -3,14 +3,15 @@ import React from 'react';
 import { useArticles } from '../contexts/ArticleContext';
 import ArticleCard from '../components/ArticleCard';
 import AdPlaceholder from '../components/AdPlaceholder';
+import SEOHead from '../components/SEOHead';
 
 const HomePage: React.FC = () => {
   const { articles, loading } = useArticles();
 
   const articlesWithAds = articles.reduce((acc, article, index) => {
     acc.push(<ArticleCard key={article.id} article={article} />);
-    // Insert an in-feed ad after every 4th article
-    if ((index + 1) % 4 === 0) {
+    // Insert an in-feed ad after every 3rd article (more ads for arbitrage)
+    if ((index + 1) % 3 === 0 && index < articles.length - 1) {
       acc.push(<AdPlaceholder key={`ad-${index}`} type="in-feed" />);
     }
     return acc;
@@ -40,7 +41,11 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-12">
+    <>
+      <SEOHead 
+        canonical="https://fearp.com"
+      />
+      <div className="space-y-12">
       <section className="text-center bg-brand-pink dark:bg-gray-800/50 p-10 rounded-xl shadow-md">
         <h1 className="text-5xl font-bold font-serif text-brand-dark-pink dark:text-pink-400 mb-4">Welcome to Fearp</h1>
         <p className="text-xl text-brand-text dark:text-gray-300 max-w-2xl mx-auto">
@@ -49,6 +54,9 @@ const HomePage: React.FC = () => {
       </section>
 
       <AdPlaceholder type="leaderboard" />
+      
+      {/* Mobile banner ad */}
+      <AdPlaceholder type="mobile-banner" />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <section className="lg:col-span-2">
@@ -64,6 +72,7 @@ const HomePage: React.FC = () => {
         </aside>
       </div>
     </div>
+    </>
   );
 };
 
