@@ -1,13 +1,20 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Header: React.FC = () => {
+  const { theme } = useTheme();
+  const logoSrc = theme === 'dark' ? '/assets/logo-dark.svg' : '/assets/logo.svg';
+  const iconSrc = theme === 'dark' ? '/assets/logo-icon-dark.svg' : '/assets/logo-icon.svg';
+  
   return (
     <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-md dark:shadow-gray-800 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link to="/" className="block">
-          <img src="/assets/logo.svg" alt="Fearp Logo" className="h-10" />
+          {/* Full logo on desktop, icon on mobile */}
+          <img src={logoSrc} alt="Fearp Logo" className="h-10 hidden md:block" />
+          <img src={iconSrc} alt="Fearp Logo" className="h-10 block md:hidden" />
         </Link>
         <nav>
           <ul className="flex space-x-6 items-center">

@@ -1,0 +1,25 @@
+<svg width="160" height="45" viewBox="0 0 160 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="simplePink" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#F9A8D4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FCE7F3;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Simple F icon -->
+  <path d="M 5 8 L 5 37 L 16 37 L 16 29 L 11 29 L 11 21 L 16 21 L 16 13 L 11 13 L 11 8 Z" 
+        fill="url(#simplePink)" 
+        stroke="#F9A8D4" 
+        stroke-width="1"/>
+  
+  <!-- Clean text -->
+  <text x="25" y="30" 
+        font-family="'Lora', serif" 
+        font-size="26" 
+        font-weight="700" 
+        fill="#4B5563" 
+        letter-spacing="0.5">
+    FEARP
+  </text>
+</svg>
+
