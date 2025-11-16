@@ -2,7 +2,7 @@
 {
   "rewrites": [
     {
-      "source": "/((?!api/|admin212/|wp-admin/|_next/|static/|public/|favicon.ico|robots.txt|sitemap.xml|ads.txt).*)",
+      "source": "/((?!api/|admin212/|wp-admin/|_next/|static/|public/|favicon.ico|robots.txt|sitemap.xml|ads.txt|google719e42c47e209f1c.html).*)",
       "destination": "/index.html"
     }
   ]
