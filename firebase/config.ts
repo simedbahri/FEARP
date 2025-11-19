@@ -1,5 +1,5 @@
 import { initializeApp, getApp, getApps } from 'firebase/app';
-import { getFirestore, initializeFirestore, memoryLocalCache, persistentLocalCache } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 // --- Firebase Configuration ---
@@ -16,14 +16,22 @@ const firebaseConfig = {
   appId: "1:643111353469:web:6138e9584e5722ac360514",
 };
 
-// Initialize Firebase
+// Initialize Firebase app
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Firestore with persistent caching (modern approach)
-export const db = initializeFirestore(app, {
-  cache: persistentLocalCache()
-});
+// Initialize Firestore with persistent caching on first load
+let db;
+try {
+  // Try to get existing instance first
+  db = getFirestore(app);
+} catch (err) {
+  // If not initialized, initialize with persistent cache
+  db = initializeFirestore(app, {
+    cache: persistentLocalCache()
+  });
+}
 
 console.log('[Firebase] ✅ Firestore initialized with persistent local cache');
 
+export { db };
 export const auth = getAuth(app);
