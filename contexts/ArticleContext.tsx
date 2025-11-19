@@ -132,8 +132,29 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
       throw new Error('Article content is required');
     }
     
+    // Check content size - Firestore has 1MB document size limit
+    const contentSize = new Blob([articleData.content]).size;
+    const titleSize = new Blob([articleData.title]).size;
+    const totalSize = contentSize + titleSize;
+    const maxSize = 900000; // Leave 100KB buffer for metadata
+    
+    if (totalSize > maxSize) {
+      const sizeMB = (totalSize / 1024 / 1024).toFixed(2);
+      const maxMB = (maxSize / 1024 / 1024).toFixed(2);
+      throw new Error(
+        `Article is too large (${sizeMB}MB). Maximum size is ${maxMB}MB.\n\n` +
+        'Tips to reduce size:\n' +
+        '- Remove or compress images\n' +
+        '- Split into multiple articles\n' +
+        '- Remove unnecessary formatting'
+      );
+    }
+    
     try {
-      console.log('[ArticleContext] ➕ Adding new article:', { title: articleData.title });
+      console.log('[ArticleContext] ➕ Adding new article:', { 
+        title: articleData.title,
+        size: (totalSize / 1024).toFixed(2) + 'KB'
+      });
       const docRef = await addDoc(articlesCollectionRef, {
         title: articleData.title.trim(),
         content: articleData.content.trim(),
@@ -149,7 +170,19 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
       console.error("[ArticleContext] ❌ Error adding article to Firestore:", error);
       console.error("[ArticleContext] Error Code:", error.code);
       console.error("[ArticleContext] Error Message:", error.message);
-      console.error("[ArticleContext] Full Error:", JSON.stringify(error, null, 2));
+      
+      // Handle document too large error
+      if (error.message?.includes('longer than') || error.code === 'invalid-argument') {
+        throw new Error(
+          `❌ Document too large!\n\n` +
+          `Your article exceeds Firestore's 1MB limit.\n\n` +
+          `Current size: ${(totalSize / 1024 / 1024).toFixed(2)}MB\n\n` +
+          `Solutions:\n` +
+          `1. Remove embedded images\n` +
+          `2. Split into multiple shorter articles\n` +
+          `3. Remove unnecessary formatting/HTML`
+        );
+      }
       
       if (error.code === 'permission-denied') {
         throw new Error(
@@ -162,11 +195,30 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   const updateArticle = async (id: string, updatedArticleData: Omit<Article, 'id' | 'date'>): Promise<void> => {
+    // Validate size before updating
+    const contentSize = new Blob([updatedArticleData.content]).size;
+    const titleSize = new Blob([updatedArticleData.title]).size;
+    const totalSize = contentSize + titleSize;
+    const maxSize = 900000;
+    
+    if (totalSize > maxSize) {
+      throw new Error(
+        `Article is too large (${(totalSize / 1024 / 1024).toFixed(2)}MB). ` +
+        `Maximum is ${(maxSize / 1024 / 1024).toFixed(2)}MB. ` +
+        `Please reduce content size.`
+      );
+    }
+    
     try {
       const articleDoc = doc(db, "articles", id);
       await updateDoc(articleDoc, updatedArticleData);
-    } catch (error) {
+      console.log('[ArticleContext] ✅ Article updated successfully');
+    } catch (error: any) {
       console.error("Error updating article in Firestore:", error);
+      
+      if (error.message?.includes('longer than') || error.code === 'invalid-argument') {
+        throw new Error(`Document too large! Please reduce content size.`);
+      }
       throw error;
     }
   };
