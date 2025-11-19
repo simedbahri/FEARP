@@ -22,80 +22,97 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   useEffect(() => {
     setLoading(true);
-    console.log('[ArticleContext] Setting up onSnapshot listener...');
+    console.log('[ArticleContext] 🔄 Setting up onSnapshot listener...');
+    console.log('[ArticleContext] Firestore project:', db.app.options.projectId);
     
-    // REMOVED: orderBy("date", "desc"). This avoids the need for a manual Firestore index,
-    // which can cause misleading "permission-denied" errors if not configured correctly.
-    const q = query(articlesCollectionRef);
+    let unsubscribe: (() => void) | null = null;
+    let retryCount = 0;
+    const maxRetries = 3;
     
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      console.log(`[ArticleContext] ✅ SUCCESS: Received ${querySnapshot.docs.length} articles from Firestore`);
-      console.log(`[ArticleContext] Snapshot size: ${querySnapshot.size} docs`);
-      
-      const fetchedArticles = querySnapshot.docs.map((doc) => {
-        const docData = doc.data();
-        const date = docData.date ? docData.date.toDate().toISOString() : new Date().toISOString();
+    const setupListener = () => {
+      try {
+        const q = query(articlesCollectionRef);
         
-        // Validate required fields
-        if (!docData.title || !docData.content) {
-          console.warn(`[ArticleContext] Article ${doc.id} is missing required fields:`, docData);
-        }
-        
-        return {
-          ...docData,
-          id: doc.id,
-          date: date,
-        } as Article;
-      });
-      
-      // Perform sorting on the client-side to ensure newest articles are first.
-      fetchedArticles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-      console.log(`[ArticleContext] ✅ Setting ${fetchedArticles.length} articles in state`);
-      console.table(fetchedArticles.map(a => ({ id: a.id, title: a.title, date: new Date(a.date).toLocaleDateString() })));
-      setArticles(fetchedArticles);
-      setLoading(false);
-    }, (error: any) => {
-      console.error("[ArticleContext] ❌ Firebase Error:", error);
-      console.error("[ArticleContext] Error Code:", error.code);
-      console.error("[ArticleContext] Error Message:", error.message);
-      console.error("[ArticleContext] Full Error Object:", JSON.stringify(error, null, 2));
-      
-      // Provide a more helpful error message for the developer.
-      if (error.code === 'permission-denied') {
-          console.error(
-            '❌ CRITICAL: Firestore Security Rules are denying access!\n\n' +
-            'This is why your articles disappear after refresh.\n\n' +
-            'SOLUTION: Go to Firebase Console → Firestore Database → Rules tab\n' +
-            'And set these rules:\n\n' +
-            'rules_version = \'2\';\n' +
-            'service cloud.firestore {\n' +
-            '  match /databases/{database}/documents {\n' +
-            '    match /articles/{document=**} {\n' +
-            '      allow read: if true;  // Allow public to read\n' +
-            '      allow write: if request.auth != null;  // Only authenticated users can write\n' +
-            '    }\n' +
-            '  }\n' +
-            '}\n\n' +
-            'Then click "Publish" to save the rules.'
-          );
-          // Show alert to user as well
-          alert(
-            '⚠️ PERMISSION ERROR\n\n' +
-            'Articles cannot be loaded due to Firestore security rules.\n\n' +
-            'Please check the browser console for detailed instructions on how to fix this.\n\n' +
-            'This is why articles disappear after refresh!'
-          );
-      } else if (error.code === 'unavailable') {
-        console.error('[ArticleContext] Firestore is unavailable. Check your internet connection.');
-      } else {
-        console.error('[ArticleContext] Unknown error:', error);
+        unsubscribe = onSnapshot(
+          q,
+          (querySnapshot) => {
+            console.log(`[ArticleContext] ✅ SUCCESS: Received ${querySnapshot.docs.length} articles from Firestore`);
+            console.log(`[ArticleContext] Timestamp: ${new Date().toLocaleTimeString()}`);
+            
+            const fetchedArticles = querySnapshot.docs.map((doc) => {
+              const docData = doc.data();
+              const date = docData.date ? docData.date.toDate().toISOString() : new Date().toISOString();
+              
+              if (!docData.title || !docData.content) {
+                console.warn(`[ArticleContext] Article ${doc.id} missing fields:`, { hasTitle: !!docData.title, hasContent: !!docData.content });
+              }
+              
+              return {
+                ...docData,
+                id: doc.id,
+                date: date,
+              } as Article;
+            });
+            
+            fetchedArticles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            
+            console.log(`[ArticleContext] ✅ Updating state with ${fetchedArticles.length} articles`);
+            if (fetchedArticles.length > 0) {
+              console.table(fetchedArticles.map(a => ({ 
+                id: a.id.substring(0, 8), 
+                title: a.title.substring(0, 30), 
+                date: new Date(a.date).toLocaleDateString() 
+              })));
+            }
+            setArticles(fetchedArticles);
+            setLoading(false);
+            retryCount = 0; // Reset retry count on success
+          },
+          (error: any) => {
+            console.error("[ArticleContext] ❌ Listener Error:", error);
+            console.error("[ArticleContext] Code:", error.code, "| Message:", error.message);
+            
+            if (error.code === 'permission-denied') {
+              console.error(
+                '❌ PERMISSION DENIED - Update your Firestore Security Rules:\n' +
+                'Go to Firebase Console → Firestore → Rules and set:\n\n' +
+                'rules_version = \'2\';\n' +
+                'service cloud.firestore {\n' +
+                '  match /databases/{database}/documents {\n' +
+                '    match /articles/{document=**} {\n' +
+                '      allow read: if true;\n' +
+                '      allow write: if request.auth != null;\n' +
+                '    }\n' +
+                '  }\n' +
+                '}\n\n' +
+                'Then click Publish and reload this page.'
+              );
+              alert('⚠️ PERMISSION ERROR\n\nPlease update Firestore Security Rules (see console for details)');
+            } else if (error.code === 'unavailable') {
+              console.warn('[ArticleContext] Firestore unavailable - retrying...');
+              if (retryCount < maxRetries) {
+                retryCount++;
+                setTimeout(setupListener, 2000 * retryCount);
+              }
+            }
+            setLoading(false);
+          }
+        );
+      } catch (err) {
+        console.error('[ArticleContext] Setup Error:', err);
+        setLoading(false);
       }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
+    };
+    
+    setupListener();
+    
+    return () => {
+      if (unsubscribe) {
+        console.log('[ArticleContext] 🛑 Cleaning up listener');
+        unsubscribe();
+      }
+    };
+  }, [articlesCollectionRef]);
   
   const addArticle = async (articleData: Omit<Article, 'id' | 'date'>): Promise<void> => {
     // Validate article data before saving
