@@ -22,17 +22,15 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 // Initialize Firestore with offline persistence
 export const db = getFirestore(app);
 
-// Enable offline persistence with unlimited cache
+// Enable offline persistence to cache articles locally
 try {
   enableIndexedDbPersistence(db, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
-  console.log('[Firebase] ✅ Offline persistence enabled with unlimited cache');
+  console.log('[Firebase] ✅ Offline persistence enabled');
 } catch (err: any) {
   if (err.code === 'failed-precondition') {
-    console.warn('[Firebase] ⚠️ Multiple tabs open - offline persistence disabled for this tab');
+    console.warn('[Firebase] Multiple tabs open - offline persistence disabled');
   } else if (err.code === 'unimplemented') {
-    console.warn('[Firebase] ⚠️ Browser does not support offline persistence');
-  } else {
-    console.warn('[Firebase] Offline persistence initialization:', err);
+    console.warn('[Firebase] Browser does not support offline persistence');
   }
 }
 

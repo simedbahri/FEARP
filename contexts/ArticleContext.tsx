@@ -22,8 +22,7 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   useEffect(() => {
     setLoading(true);
-    console.log('[ArticleContext] 🔄 Setting up onSnapshot listener...');
-    console.log('[ArticleContext] Firestore project:', db.app.options.projectId);
+    console.log('[ArticleContext] Setting up onSnapshot listener...');
     
     let unsubscribe: (() => void) | null = null;
     let retryCount = 0;
@@ -34,26 +33,24 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
       try {
         const q = query(articlesCollectionRef);
         
-        // Set a timeout to detect if Firebase is stuck
+        // Set timeout to detect stuck connections (15 seconds)
         timeoutId = setTimeout(() => {
-          console.warn('[ArticleContext] ⏱️ Firebase not responding after 15 seconds - may be offline');
+          console.warn('[ArticleContext] ⏱️ Firebase not responding after 15s - may be offline');
         }, 15000);
         
         unsubscribe = onSnapshot(
           q,
           (querySnapshot) => {
-            // Clear timeout on successful response
             if (timeoutId) clearTimeout(timeoutId);
             
-            console.log(`[ArticleContext] ✅ SUCCESS: Received ${querySnapshot.docs.length} articles from Firestore`);
-            console.log(`[ArticleContext] ⏰ Timestamp: ${new Date().toLocaleTimeString()}`);
+            console.log(`[ArticleContext] ✅ SUCCESS: Received ${querySnapshot.docs.length} articles`);
             
             const fetchedArticles = querySnapshot.docs.map((doc) => {
               const docData = doc.data();
               const date = docData.date ? docData.date.toDate().toISOString() : new Date().toISOString();
               
               if (!docData.title || !docData.content) {
-                console.warn(`[ArticleContext] Article ${doc.id} missing fields:`, { hasTitle: !!docData.title, hasContent: !!docData.content });
+                console.warn(`[ArticleContext] Article ${doc.id} missing required fields`);
               }
               
               return {
@@ -64,27 +61,18 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
             });
             
             fetchedArticles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-            
-            console.log(`[ArticleContext] ✅ Updating state with ${fetchedArticles.length} articles`);
-            if (fetchedArticles.length > 0) {
-              console.table(fetchedArticles.map(a => ({ 
-                id: a.id.substring(0, 8), 
-                title: a.title.substring(0, 30), 
-                date: new Date(a.date).toLocaleDateString() 
-              })));
-            }
+            console.log(`[ArticleContext] Updating state with ${fetchedArticles.length} articles`);
             setArticles(fetchedArticles);
             setLoading(false);
-            retryCount = 0;
+            retryCount = 0; // Reset on success
           },
           (error: any) => {
             if (timeoutId) clearTimeout(timeoutId);
-            
-            console.error("[ArticleContext] ❌ Listener Error:", error.code, "-", error.message);
+            console.error("[ArticleContext] Error:", error.code, "-", error.message);
             
             if (error.code === 'permission-denied') {
               console.error(
-                '❌ PERMISSION DENIED - Update your Firestore Security Rules:\n' +
+                '❌ PERMISSION DENIED:\n' +
                 'Go to Firebase Console → Firestore → Rules and set:\n\n' +
                 'rules_version = \'2\';\n' +
                 'service cloud.firestore {\n' +
@@ -95,19 +83,18 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
                 '    }\n' +
                 '  }\n' +
                 '}\n\n' +
-                'Then click Publish and reload this page.'
+                'Then click Publish and reload.'
               );
-              alert('⚠️ PERMISSION ERROR\n\nPlease update Firestore Security Rules (see console for details)');
               setLoading(false);
             } else if (error.code === 'unavailable' || error.code === 'deadline-exceeded') {
-              console.warn('[ArticleContext] ⏱️ Backend unavailable or timeout - retrying with exponential backoff...');
+              console.warn(`[ArticleContext] Network timeout - retrying... (${retryCount}/${maxRetries})`);
               if (retryCount < maxRetries) {
                 retryCount++;
-                const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
-                console.log(`[ArticleContext] 🔄 Retry ${retryCount}/${maxRetries} in ${delay}ms`);
+                const delay = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s exponential backoff
+                console.log(`[ArticleContext] Retry in ${delay}ms`);
                 setTimeout(setupListener, delay);
               } else {
-                console.error('[ArticleContext] Max retries reached. Using offline cache if available.');
+                console.error('[ArticleContext] Max retries reached. Using offline cache.');
                 setLoading(false);
               }
             } else {
@@ -118,7 +105,7 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
         );
       } catch (err) {
         if (timeoutId) clearTimeout(timeoutId);
-        console.error('[ArticleContext] Setup Error:', err);
+        console.error('[ArticleContext] Setup error:', err);
         setLoading(false);
       }
     };
@@ -128,7 +115,7 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
       if (unsubscribe) {
-        console.log('[ArticleContext] 🛑 Cleaning up listener');
+        console.log('[ArticleContext] Cleaning up listener');
         unsubscribe();
       }
     };
