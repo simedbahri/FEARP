@@ -1,5 +1,5 @@
 import { initializeApp, getApp, getApps } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 // --- Firebase Configuration ---
@@ -19,6 +19,21 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Export services, which are now guaranteed to be initialized.
+// Initialize Firestore with offline persistence
 export const db = getFirestore(app);
+
+// Enable offline persistence with unlimited cache
+try {
+  enableIndexedDbPersistence(db, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
+  console.log('[Firebase] ✅ Offline persistence enabled with unlimited cache');
+} catch (err: any) {
+  if (err.code === 'failed-precondition') {
+    console.warn('[Firebase] ⚠️ Multiple tabs open - offline persistence disabled for this tab');
+  } else if (err.code === 'unimplemented') {
+    console.warn('[Firebase] ⚠️ Browser does not support offline persistence');
+  } else {
+    console.warn('[Firebase] Offline persistence initialization:', err);
+  }
+}
+
 export const auth = getAuth(app);
