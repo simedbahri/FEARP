@@ -1,0 +1,55 @@
+<svg width="180" height="50" viewBox="0 0 180 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient circle for icon -->
+  <defs>
+    <linearGradient id="pinkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F9A8D4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FCE7F3;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FBBF24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FCD34D;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Icon: Stylized F with sparkle -->
+  <g transform="translate(5, 5)">
+    <!-- F letter shape -->
+    <path d="M 8 5 L 8 35 L 20 35 L 20 28 L 15 28 L 15 20 L 20 20 L 20 13 L 15 13 L 15 5 Z" 
+          fill="url(#pinkGradient)" 
+          stroke="#F9A8D4" 
+          stroke-width="1.5"/>
+    
+    <!-- Sparkle/star decoration -->
+    <circle cx="22" cy="8" r="2.5" fill="url(#goldGradient)" filter="url(#glow)"/>
+    <path d="M 22 4 L 22.8 6.5 L 25.3 6.5 L 23.2 8 L 25.3 9.5 L 22.8 9.5 Z" 
+          fill="#FBBF24" 
+          opacity="0.8"/>
+  </g>
+  
+  <!-- Text: FEARP -->
+  <text x="45" y="32" 
+        font-family="'Lora', serif" 
+        font-size="28" 
+        font-weight="700" 
+        fill="#4B5563" 
+        letter-spacing="1">
+    FEARP
+  </text>
+  
+  <!-- Decorative underline -->
+  <line x1="45" y1="36" x2="165" y2="36" 
+        stroke="url(#pinkGradient)" 
+        stroke-width="2.5" 
+        stroke-linecap="round"/>
+  
+  <!-- Small accent dots -->
+  <circle cx="170" cy="20" r="2" fill="#F9A8D4" opacity="0.6"/>
+  <circle cx="175" cy="25" r="1.5" fill="#FBBF24" opacity="0.7"/>
+</svg>

@@ -1,0 +1,35 @@
+<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="iconPink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F9A8D4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FCE7F3;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="iconGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FBBF24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FCD34D;stop-opacity:1" />
+    </linearGradient>
+    <filter id="iconGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Circular background -->
+  <circle cx="25" cy="25" r="22" fill="url(#iconPink)" opacity="0.2"/>
+  
+  <!-- F letter -->
+  <path d="M 12 10 L 12 40 L 22 40 L 22 32 L 17 32 L 17 24 L 22 24 L 22 16 L 17 16 L 17 10 Z" 
+        fill="url(#iconPink)" 
+        stroke="#F9A8D4" 
+        stroke-width="1.5"/>
+  
+  <!-- Sparkle -->
+  <circle cx="30" cy="12" r="3" fill="url(#iconGold)" filter="url(#iconGlow)"/>
+  <path d="M 30 7 L 31 10.5 L 34.5 10.5 L 32 13 L 34.5 15.5 L 31 15.5 Z" 
+        fill="#FBBF24" 
+        opacity="0.9"/>
+</svg>
+
