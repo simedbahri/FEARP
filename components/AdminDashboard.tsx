@@ -94,8 +94,8 @@ const ArticleForm: React.FC<{
                 className="block w-full h-60 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-dark-pink focus:border-brand-dark-pink bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
               ></div>
               {isContentEmpty && (
-                <div className="absolute top-2 left-3 text-gray-400 dark:text-gray-500 pointer-events-none">
-                  Paste your article content here, including images.
+                <div className="absolute top-2 left-3 text-gray-400 dark:text-gray-500 pointer-events-none text-sm">
+                  📝 Paste text only (no images). Use external image URLs instead.
                 </div>
               )}
             </div>

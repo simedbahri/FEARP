@@ -132,21 +132,32 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
       throw new Error('Article content is required');
     }
     
+    let cleanContent = articleData.content.trim();
+    
+    // Remove embedded base64 images to reduce size
+    // Matches data:image/* patterns that are causing size issues
+    const base64ImageRegex = /data:image\/[^;]+;base64,[^"'<>]*/g;
+    cleanContent = cleanContent.replace(base64ImageRegex, '[Image removed - too large to store]');
+    
     // Check content size - Firestore has 1MB document size limit
-    const contentSize = new Blob([articleData.content]).size;
+    const contentSize = new Blob([cleanContent]).size;
     const titleSize = new Blob([articleData.title]).size;
     const totalSize = contentSize + titleSize;
-    const maxSize = 900000; // Leave 100KB buffer for metadata
+    const maxSize = 800000; // 800KB limit (200KB buffer for metadata)
+    
+    console.log(`[ArticleContext] Content size check: ${(contentSize / 1024).toFixed(2)}KB / ${(maxSize / 1024).toFixed(2)}KB`);
     
     if (totalSize > maxSize) {
       const sizeMB = (totalSize / 1024 / 1024).toFixed(2);
       const maxMB = (maxSize / 1024 / 1024).toFixed(2);
+      console.error(`[ArticleContext] Article exceeds size limit: ${sizeMB}MB > ${maxMB}MB`);
       throw new Error(
-        `Article is too large (${sizeMB}MB). Maximum size is ${maxMB}MB.\n\n` +
-        'Tips to reduce size:\n' +
-        '- Remove or compress images\n' +
-        '- Split into multiple articles\n' +
-        '- Remove unnecessary formatting'
+        `❌ Article is too large (${sizeMB}MB). Maximum size is ${maxMB}MB.\n\n` +
+        'How to fix this:\n' +
+        '✓ Copy your text to a plain text editor first\n' +
+        '✓ Paste text ONLY (no images)\n' +
+        '✓ Use external image links instead of embedding\n' +
+        '✓ Split very long articles into multiple posts'
       );
     }
     
@@ -157,37 +168,33 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
       });
       const docRef = await addDoc(articlesCollectionRef, {
         title: articleData.title.trim(),
-        content: articleData.content.trim(),
+        content: cleanContent,
         imageUrl: articleData.imageUrl || null,
         date: serverTimestamp(),
       });
       console.log('[ArticleContext] ✅ Article added successfully with ID:', docRef.id);
-      console.log('[ArticleContext] Waiting for onSnapshot listener to update articles list...');
       
       // Note: The article will appear automatically via onSnapshot listener
-      // No need to manually update state
     } catch (error: any) {
-      console.error("[ArticleContext] ❌ Error adding article to Firestore:", error);
-      console.error("[ArticleContext] Error Code:", error.code);
-      console.error("[ArticleContext] Error Message:", error.message);
+      console.error("[ArticleContext] ❌ Error adding article:", error.message);
       
       // Handle document too large error
       if (error.message?.includes('longer than') || error.code === 'invalid-argument') {
+        console.error('[ArticleContext] Size exceeded on send - content was not cleaned properly');
         throw new Error(
-          `❌ Document too large!\n\n` +
-          `Your article exceeds Firestore's 1MB limit.\n\n` +
-          `Current size: ${(totalSize / 1024 / 1024).toFixed(2)}MB\n\n` +
-          `Solutions:\n` +
-          `1. Remove embedded images\n` +
-          `2. Split into multiple shorter articles\n` +
-          `3. Remove unnecessary formatting/HTML`
+          `❌ Document too large to save (${(totalSize / 1024 / 1024).toFixed(2)}MB)!\n\n` +
+          `This usually means you have embedded images in your content.\n\n` +
+          `Solution:\n` +
+          `1. Copy your article text\n` +
+          `2. Clear the editor\n` +
+          `3. Paste only the TEXT (Ctrl+V as plain text)\n` +
+          `4. Add images as external URLs, not embedded`
         );
       }
       
       if (error.code === 'permission-denied') {
         throw new Error(
-          'Permission denied: Your Firestore security rules do not allow writing articles. ' +
-          'Please check the browser console for instructions on how to fix this.'
+          'Permission denied: Your Firestore security rules do not allow writing articles.'
         );
       }
       throw error;
