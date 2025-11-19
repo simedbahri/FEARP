@@ -1,5 +1,5 @@
 import { initializeApp, getApp, getApps } from 'firebase/app';
-import { getFirestore, enableIndexedDbPersistence, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, memoryLocalCache, persistentLocalCache } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 // --- Firebase Configuration ---
@@ -19,19 +19,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Firestore with offline persistence
-export const db = getFirestore(app);
+// Initialize Firestore with persistent caching (modern approach)
+export const db = initializeFirestore(app, {
+  cache: persistentLocalCache()
+});
 
-// Enable offline persistence to cache articles locally
-try {
-  enableIndexedDbPersistence(db, { cacheSizeBytes: CACHE_SIZE_UNLIMITED });
-  console.log('[Firebase] ✅ Offline persistence enabled');
-} catch (err: any) {
-  if (err.code === 'failed-precondition') {
-    console.warn('[Firebase] Multiple tabs open - offline persistence disabled');
-  } else if (err.code === 'unimplemented') {
-    console.warn('[Firebase] Browser does not support offline persistence');
-  }
-}
+console.log('[Firebase] ✅ Firestore initialized with persistent local cache');
 
 export const auth = getAuth(app);
