@@ -18,7 +18,9 @@ const ArticleContext = createContext<ArticleContextType | undefined>(undefined);
 export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const articlesCollectionRef = collection(db, "articles");
+  
+  // Create ref once and reuse it - fixes infinite listener recreation
+  const articlesCollectionRef = React.useMemo(() => collection(db, "articles"), []);
 
   useEffect(() => {
     setLoading(true);
@@ -119,7 +121,7 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
         unsubscribe();
       }
     };
-  }, [articlesCollectionRef]);
+  }, []); // Empty dependency array - listener set up once on mount
   
   const addArticle = async (articleData: Omit<Article, 'id' | 'date'>): Promise<void> => {
     // Validate article data before saving
